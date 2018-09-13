@@ -1,4 +1,5 @@
 package calculator;
+import com.sun.xml.internal.ws.wsdl.DispatchException;
 import com.sun.xml.internal.ws.wsdl.writer.document.Port;
 import java.util.Stack;
 import javax.swing.*;
@@ -207,7 +208,7 @@ public class CalDesign extends javax.swing.JFrame {
         btn_dl.setText("←");
         btn_dl.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                //btn_dlActionPerformed(evt);
+                CorrectionActionPerformed(evt);
             }
         });
 
@@ -607,6 +608,14 @@ public class CalDesign extends javax.swing.JFrame {
                         miniState=0;
                     }
                 }
+            case "←":
+                if(operatorStack.isEmpty() && State==0){
+                    return;
+                }
+                else{
+                    delAction(click);
+                }
+
         }
 
     }
@@ -657,6 +666,7 @@ public class CalDesign extends javax.swing.JFrame {
         }
         else if(State==3){
             operatorStack.push("<op2>");
+            State=6;
         }
         else if(State==0){
             return;
@@ -780,8 +790,8 @@ public class CalDesign extends javax.swing.JFrame {
                 }
                 else if(invoke.equals("±")){
                     DelComplex();
-                    miniState=defineMiniState();
                     operatorStack.pop();
+                    miniState=defineMiniState();
                     State=defineState();
                 }
                 else if(invoke.equals("1 ⁄ X")){
@@ -831,4 +841,92 @@ public class CalDesign extends javax.swing.JFrame {
                 return 0;
         }
     }
+    void delAction(ActionEvent click){
+        String instroke= Display_port.getText();
+        char in;
+        int in_asc;
+        switch(State){
+            case 0:
+                if (!operatorStack.isEmpty()){
+                    Display_port.setText(subprevious(instroke));
+                    State=defineState();
+                    miniState=defineMiniState();
+                    operatorStack.pop();
+                }
+                break;
+            case 1:
+                if (!operatorStack.isEmpty()){
+                    Display_port.setText(subprevious(instroke));
+                    instroke=Display_port.getText();
+                    in =instroke.charAt(instroke.length()-1);
+                    in_asc=(int)in;
+                    if(in_asc>=48 && in_asc<=57){
+                        return;
+                    }
+                    else{
+                        State=defineState();
+                        miniState=defineMiniState();
+                        operatorStack.pop();
+                    }
+                }
+                else{
+                    in =instroke.charAt(instroke.length()-1);
+                    in_asc=(int)in;
+                    if (instroke.equals("0")){
+                        State=0;
+                    }
+                    else if(instroke.length()==1){
+                        State =0;
+                        Display_port.setText("0");
+                    }
+                    else{
+                        Display_port.setText(subprevious(instroke));
+                    }
+                }
+                break;
+            case 2:
+                Display_port.setText(subprevious(instroke));
+                instroke=Display_port.getText();
+                in =instroke.charAt(instroke.length()-1);
+                in_asc=(int)in;
+                if (in_asc==48 && instroke.length()==1){
+                    State=0;
+                    miniState=0;
+                }
+                else if(in_asc>=49 && in_asc<=57){
+                    State=1;
+                    miniState=0;
+                }
+                else{
+                    State=defineState();
+                    miniState=defineMiniState();
+                    operatorStack.pop();
+                }
+                break;
+            case 3:
+                Display_port.setText(subprevious(instroke));
+                instroke=Display_port.getText();
+                in=instroke.charAt(instroke.length()-1);
+                in_asc=(int)in;
+                if(in_asc>=48 && in_asc<=57){
+                    return;
+                }
+                else if(in=='.'){
+                    State=2;
+                }
+                break;
+            case 4:
+                Display_port.setText(subprevious(instroke));
+                State=defineState();
+                miniState=defineMiniState();
+                operatorStack.pop();
+                break;
+            case 6:
+                DelComplex();
+                operatorStack.pop();
+                State=defineState();
+                miniState=defineMiniState();
+        }
+        }
 }
+
