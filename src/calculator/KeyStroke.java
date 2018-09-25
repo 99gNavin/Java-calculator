@@ -1,7 +1,12 @@
+package calculator;
 
-/* public class implements KeyListener{
+import java.awt.event.*;
 
-    public void Keypresed(KeyEvent evt){
+public class KeyStroke extends Thread{
+    @Override
+    public void run() {
+        while(true){
 
+        }
     }
-}*/
+}

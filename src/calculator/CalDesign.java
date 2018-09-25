@@ -222,6 +222,12 @@ public class CalDesign extends javax.swing.JFrame {
 
         btn_EQUALS_TO.setBackground(new java.awt.Color(255, 51, 0));
         btn_EQUALS_TO.setText("=");
+        btn_EQUALS_TO.addActionListener(new java.awt.event.ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                EvalActionPerformed(evt);
+            }
+        });
 
         btn_MC.setText("MC");
         btn_MC.addActionListener(new java.awt.event.ActionListener() {
@@ -419,7 +425,7 @@ public class CalDesign extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    public static strictfp void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -599,6 +605,7 @@ public class CalDesign extends javax.swing.JFrame {
                 Display_port.setText("0");
                 State=0;
                 miniState=0;
+                operatorStack.clear();
                 break;
             case "CE":
                 if (State==2 || State==1 || State==3){
@@ -704,8 +711,9 @@ public class CalDesign extends javax.swing.JFrame {
                     operatorStack.push("<aopr2>");
                 }
                 else if(invoke.equals("%")){
-                    //EvalActionPerformed();
-                    //AriPercentage();
+                    EvalActionPerformed(click);
+                    arimath ari=new arimath();
+                    ari.ariPercentage(Display_port.getText());
                     if(PortStat.equals("0")){
                         State=0;
                     }
@@ -841,6 +849,16 @@ public class CalDesign extends javax.swing.JFrame {
                 return 0;
         }
     }
+
+    /**
+     *
+     * @param click
+     * delete action consist of 3 major action
+     * 1: deleting one character or one operator/operand at a time
+     * 2: Checking the current State and miniState for next input to occur
+     * 3: to pop element out of Stack
+     * It futher uses DFA structure to delete
+     */
     void delAction(ActionEvent click){
         String instroke= Display_port.getText();
         char in;
@@ -898,9 +916,9 @@ public class CalDesign extends javax.swing.JFrame {
                     miniState=0;
                 }
                 else{
+                    operatorStack.pop();
                     State=defineState();
                     miniState=defineMiniState();
-                    operatorStack.pop();
                 }
                 break;
             case 3:
@@ -923,10 +941,56 @@ public class CalDesign extends javax.swing.JFrame {
                 break;
             case 6:
                 DelComplex();
-                operatorStack.pop();
                 State=defineState();
                 miniState=defineMiniState();
+                operatorStack.pop();
         }
+    }
+
+    /**
+     *
+      * @param error refers to the type of error that occured
+     *  It uses State 7 of the DFA but State 7 has never been defined in the documentation
+     *  It is because State 7 is undefined State and has no changes except when cleared
+     *  math error define division by zero
+     *  Infinity error defines rooting of negative number
+     */
+    public void errorset(String error){
+        Display_port.setText(error);
+        State=7;
+        miniState=0;
+    }
+
+    /**
+     *
+     * @param click
+     * lex.KeyParser is a funtion that takes the current string in the display port and parses it to operators nad operand
+     * it also has futher capability to calculate precedance and implement the calculation
+     * It aslo define the State of the input after calculation
+     * Infinity and Nan are error in this seciton
+     */
+    public void EvalActionPerformed(ActionEvent click){
+        if(State!=7){
+            KeyEngine lex= new KeyEngine();
+            String result=lex.KeyParser(Display_port.getText());
+            Display_port.setText(result);
+            if (result.contains(".")){
+                State=3;
+            }
+            else if(result.equals("0")){
+                State=0;
+            }
+            else if(result.equals("Infinity")){
+                errorset("math error");
+            }
+            else if(result.equals("NaN")){
+                errorset("Imaginary error");
+            }
+            else{
+                State=1;
+            }
+            operatorStack.clear();
         }
+    }
 }
 
