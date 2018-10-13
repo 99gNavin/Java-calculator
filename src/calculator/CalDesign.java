@@ -1,6 +1,8 @@
 package calculator;
 import com.sun.xml.internal.ws.wsdl.DispatchException;
 import com.sun.xml.internal.ws.wsdl.writer.document.Port;
+
+import java.awt.*;
 import java.util.Stack;
 import javax.swing.*;
 import java.awt.event.*;
@@ -17,6 +19,7 @@ public class CalDesign extends javax.swing.JFrame {
      */
     public CalDesign() {
         initComponents();
+        setIcon();
     }
 
     /**
@@ -26,6 +29,9 @@ public class CalDesign extends javax.swing.JFrame {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void setIcon(){
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("cal-icon.png")));
+    }
     private void initComponents() {
 
         btn_0 = new javax.swing.JButton();
